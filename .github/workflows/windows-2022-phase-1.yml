@@ -1,7 +1,10 @@
 name: Windows 2022 Phase 1
 
 on:
+  # فعال کردن حالت اجرای دستی (Manual Trigger)
   workflow_dispatch:
+
+  # حالتهای پوش و پولریکوئست که طبق درخواست شما کامنت شدهاند:
   # push:
   #   branches: [ "main" ]
   # pull_request:
@@ -9,26 +12,33 @@ on:
 
 jobs:
   build:
+    # فاز اول: تنظیم شده فقط برای ویندوز 2022
     runs-on: windows-2022
 
     steps:
-      # ۱. دریافت کدهای مخزن اصلی (اختیاری)
+      # ۱. دریافت کدهای مخزن اصلی (مخزنی که این اکشن در آن قرار دارد)
       - name: Checkout main repository
         uses: actions/checkout@v4
 
-      # ۲. کلون کردن مخزن paperless-forms با استفاده از توکن
-      - name: Clone paperless-forms repository
+      # ۲. کلون کردن مخزن CBFS2024 با استفاده از توکن شما
+      - name: Clone CBFS2024 repository
         uses: actions/checkout@v4
         with:
-          repository: Hossein558/paperless-forms
+          repository: Hossein558/CBFS2024
           token: ${{ secrets.PRIVATE_REPO_TOKEN }}
-          path: paperless-forms # پوشهای که فایلها در آن کلون میشوند
+          path: CBFS2024 # فایلها در این پوشه کلون میشوند
 
-      # ۳. اکسترکت کردن فایل فشرده با پسورد
-      - name: Extract archive with password
+      # ۳. پیدا کردن و اکسترکت کردن تمام فایلهای RAR با پسورد
+      - name: Extract all RAR files with password
         run: |
-          cd paperless-forms
+          cd CBFS2024
           
-          # توجه: نام "archive.zip" را با نام واقعی فایل فشرده خود جایگزین کنید.
-          # سوییچ p- برای پسورد و سوییچ o- برای مسیر استخراج است.
-          7z x archive.zip -p"${{ secrets.ZIP_PASSWROD }}" -o"extracted_files"
+          # اجرای دستور در پاورشل برای پیدا کردن تمام فایلهای .rar و اکسترکت آنها
+          Get-ChildItem -Recurse -Filter *.rar | ForEach-Object {
+              Write-Host "Extracting: $($_.FullName)"
+              
+              # دستور 7z برای اکسترکت؛ سوییچ p- برای رمز عبور و o- برای پوشه خروجی است
+              # فایلها در پوشهای همنام با خود فایل rar اکسترکت میشوند
+              & "7z" x $_.FullName -p"${{ secrets.ZIP_PASSWROD }}" -o"$($_.DirectoryName)\$($_.BaseName)_extracted" -y
+          }
+        shell: powershell
