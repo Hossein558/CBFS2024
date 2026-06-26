@@ -1,0 +1,25 @@
+name: Windows 2022 Phase 1
+
+on:
+  # فعال کردن حالت اجرای دستی (Manual Trigger)
+  workflow_dispatch:
+
+  # حالتهای پوش و پولریکوئست که طبق درخواست شما کامنت شدهاند:
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
+
+jobs:
+  build:
+    # فاز اول: تنظیم شده فقط برای ویندوز 2022
+    runs-on: windows-2022
+
+    steps:
+      # دریافت کدهای مخزن
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # یک مرحله آزمایشی برای اطمینان از کارکرد اکشن در ویندوز
+      - name: Run a test command
+        run: echo "Hello from Windows Server 2022!"
