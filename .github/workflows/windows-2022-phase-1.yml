@@ -1,10 +1,7 @@
 name: Windows 2022 Phase 1
 
 on:
-  # فعال کردن حالت اجرای دستی (Manual Trigger)
   workflow_dispatch:
-
-  # حالتهای پوش و پولریکوئست که طبق درخواست شما کامنت شدهاند:
   # push:
   #   branches: [ "main" ]
   # pull_request:
@@ -12,14 +9,26 @@ on:
 
 jobs:
   build:
-    # فاز اول: تنظیم شده فقط برای ویندوز 2022
     runs-on: windows-2022
 
     steps:
-      # دریافت کدهای مخزن
-      - name: Checkout repository
+      # ۱. دریافت کدهای مخزن اصلی (اختیاری)
+      - name: Checkout main repository
         uses: actions/checkout@v4
 
-      # یک مرحله آزمایشی برای اطمینان از کارکرد اکشن در ویندوز
-      - name: Run a test command
-        run: echo "Hello from Windows Server 2022!"
+      # ۲. کلون کردن مخزن paperless-forms با استفاده از توکن
+      - name: Clone paperless-forms repository
+        uses: actions/checkout@v4
+        with:
+          repository: Hossein558/paperless-forms
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+          path: paperless-forms # پوشهای که فایلها در آن کلون میشوند
+
+      # ۳. اکسترکت کردن فایل فشرده با پسورد
+      - name: Extract archive with password
+        run: |
+          cd paperless-forms
+          
+          # توجه: نام "archive.zip" را با نام واقعی فایل فشرده خود جایگزین کنید.
+          # سوییچ p- برای پسورد و سوییچ o- برای مسیر استخراج است.
+          7z x archive.zip -p"${{ secrets.ZIP_PASSWROD }}" -o"extracted_files"
